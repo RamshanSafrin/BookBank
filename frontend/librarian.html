@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Librarian Dashboard — Manage books, issue &amp; return books, and view student records.">
+    <title>Book Bank — Librarian Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        @media print {
+
+            .sidebar,
+            .btn-no-print,
+            .modal-overlay {
+                display: none !important;
+            }
+
+            .librarian-layout {
+                display: block !important;
+            }
+
+            .main-panel {
+                margin: 0 !important;
+                padding: 10px !important;
+            }
+
+            .lib-section {
+                display: block !important;
+            }
+
+            .lib-section:not(#reportsSection) {
+                display: none !important;
+            }
+
+            #reportsSection {
+                display: block !important;
+            }
+
+            body {
+                background: white !important;
+                color: black !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="librarian-layout">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <span class="logo-icon">📚</span>
+                <h2>Book Bank</h2>
+                <p>Library Admin</p>
+            </div>
+            <ul class="sidebar-nav">
+                <li>
+                    <a href="#" onclick="switchSection('dashboard'); return false;" id="nav-dashboard" class="active">
+                        <span class="nav-icon">📊</span>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" onclick="switchSection('inventory'); return false;" id="nav-inventory">
+                        <span class="nav-icon">📚</span>
+                        <span>Library Inventory</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" onclick="switchSection('reservations'); return false;" id="nav-reservations">
+                        <span class="nav-icon">🎟️</span>
+                        <span>Reservations</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" onclick="switchSection('issueBooks'); return false;" id="nav-issueBooks">
+                        <span class="nav-icon">📤</span>
+                        <span>Issue Books</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" onclick="switchSection('students'); return false;" id="nav-students">
+                        <span class="nav-icon">👥</span>
+                        <span>Students</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" onclick="switchSection('reports'); return false;" id="nav-reports">
+                        <span class="nav-icon">📋</span>
+                        <span>Reports</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="sidebar-bottom">
+                <a href="#" class="btn-no-print" onclick="logout(); return false;"><span class="nav-icon">⏻</span>
+                    <span>Logout</span></a>
+            </div>
+        </aside>
+
+        <!-- Main Panel -->
+        <main class="main-panel">
+
+            <!-- ═══ Dashboard Section ═══ -->
+            <section id="dashboardSection" class="lib-section active">
+                <h2 class="section-title"><span class="icon">📊</span> Dashboard Overview</h2>
+
+                <div class="stats-row">
+                    <div class="card stat-card green">
+                        <span class="stat-icon">📚</span>
+                        <span class="stat-number" id="totalBooks">0</span>
+                        <span class="stat-label">Total Books</span>
+                    </div>
+                    <div class="card stat-card orange">
+                        <span class="stat-icon">📤</span>
+                        <span class="stat-number" id="issuedBooks">0</span>
+                        <span class="stat-label">Issued</span>
+                    </div>
+                    <div class="card stat-card blue">
+                        <span class="stat-icon">📥</span>
+                        <span class="stat-number" id="availableBooks">0</span>
+                        <span class="stat-label">Available</span>
+                    </div>
+                    <div class="card stat-card red">
+                        <span class="stat-icon">👥</span>
+                        <span class="stat-number" id="totalStudents">0</span>
+                        <span class="stat-label">Students</span>
+                    </div>
+                </div>
+
+                <!-- Recent Books in Dashboard -->
+                <div class="card card-no-hover">
+                    <h3 class="section-title"><span class="icon">📖</span> Recent Books</h3>
+                    <div class="table-wrapper">
+                        <table id="recentBooksTable" style="display:none;">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Author</th>
+                                    <th>Department</th>
+                                    <th>ISBN</th>
+                                    <th>Qty</th>
+                                    <th>Available</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentBooksBody"></tbody>
+                        </table>
+                        <div id="recentBooksEmpty" class="empty-state">
+                            <span class="empty-icon">📭</span>
+                            <p>No books in the library yet. Add your first book!</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══ Library Inventory Section (Merged: Inventory + Manage Books) ═══ -->
+            <section id="inventorySection" class="lib-section">
+                <h2 class="section-title"><span class="icon">📚</span> Library Inventory</h2>
+
+                <!-- Add Book Form -->
+                <div class="card card-no-hover" style="margin-bottom:28px;">
+                    <h3>➕ Add New Book</h3>
+                    <form id="addBookForm" onsubmit="handleAddBook(event)">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="bookTitle">Title</label>
+                                <input type="text" id="bookTitle" placeholder="Book title" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="bookAuthor">Author</label>
+                                <input type="text" id="bookAuthor" placeholder="Author name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="bookIsbn">ISBN</label>
+                                <input type="text" id="bookIsbn" placeholder="ISBN number" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="bookDepartment">Department</label>
+                                <select id="bookDepartment">
+                                    <option value="CSE">CSE</option>
+                                    <option value="ECE">ECE</option>
+                                    <option value="EEE">EEE</option>
+                                    <option value="Mechanical">Mechanical</option>
+                                    <option value="Civil">Civil</option>
+                                    <option value="Other" selected>Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="bookQty">Quantity</label>
+                                <input type="number" id="bookQty" placeholder="1" min="1" value="1">
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary" style="width:auto;">Add Book</button>
+                            <button type="reset" class="btn btn-outline">Clear</button>
+                        </div>
+                    </form>
+                    <div id="addBookAlert" class="alert" style="margin-top:16px;"></div>
+                </div>
+
+                <!-- Inventory Table -->
+                <div class="card card-no-hover">
+                    <h3 class="section-title"><span class="icon">📖</span> Book List</h3>
+                    <div class="search-bar" style="margin-bottom:20px;">
+                        <input type="text" id="libInventorySearch"
+                            placeholder="Search by title, author, isbn, or department..." onkeyup="searchInventory()">
+                        <button class="btn btn-primary" style="width:auto;" onclick="loadInventory()">Refresh</button>
+                    </div>
+                    <div class="table-wrapper">
+                        <table id="inventoryTable" style="display:none;">
+                            <thead>
+                                <tr>
+                                    <th>Book Title</th>
+                                    <th>Author</th>
+                                    <th>Department</th>
+                                    <th>ISBN</th>
+                                    <th>Total Qty</th>
+                                    <th>Available</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryBody"></tbody>
+                        </table>
+                        <div id="inventoryEmpty" class="empty-state">
+                            <span class="empty-icon">📭</span>
+                            <p>No books found.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══ Issue Books Section ═══ -->
+            <div id="issueBooksSection" class="lib-section">
+                <h2 class="section-title"><span class="icon">📤</span> Issue &amp; Return Books</h2>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:28px;">
+                    <!-- Issue Book -->
+                    <div class="card card-no-hover">
+                        <h3>📤 Issue a Book</h3>
+                        <form id="issueBookForm" onsubmit="handleIssueBook(event)">
+                            <div class="form-group">
+                                <label for="issueBookId">Book</label>
+                                <select id="issueBookId" required>
+                                    <option value="">Select a book...</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="issueStudentId">Student Register Number</label>
+                                <input type="text" id="issueStudentId" placeholder="Enter student Register Number"
+                                    required>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width:auto;">Issue Book</button>
+                        </form>
+                        <div id="issueAlert" class="alert" style="margin-top:12px;"></div>
+                    </div>
+
+                    <!-- Return Book -->
+                    <div class="card card-no-hover">
+                        <h3>📥 Return a Book</h3>
+                        <form id="returnBookForm" onsubmit="handleReturnBook(event)">
+                            <div class="form-group">
+                                <label for="returnBookId">Book</label>
+                                <select id="returnBookId" required>
+                                    <option value="">Select a book...</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="returnStudentId">Student Register Number</label>
+                                <input type="text" id="returnStudentId" placeholder="Enter student Register Number"
+                                    required>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width:auto;">Return Book</button>
+                        </form>
+                        <div id="returnAlert" class="alert" style="margin-top:12px;"></div>
+                    </div>
+                </div>
+
+                <!-- Issued Books Table -->
+                <div class="card card-no-hover" style="margin-top:28px;">
+                    <h3 class="section-title"><span class="icon">📖</span> Currently Issued Books</h3>
+                    <div class="table-wrapper">
+                        <table id="issuedBooksTable" style="display:none;">
+                            <thead>
+                                <tr>
+                                    <th>Student Name</th>
+                                    <th>Reg No</th>
+                                    <th>Dept</th>
+                                    <th>Book Title</th>
+                                    <th>Issue Date</th>
+                                    <th>Due Date</th>
+                                    <th>Fine</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="issuedBooksBody"></tbody>
+                        </table>
+                        <div id="issuedBooksEmpty" class="empty-state">
+                            <p>No books are currently issued.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ Reservations Section ═══ -->
+            <div id="reservationsSection" class="lib-section">
+                <h2 class="section-title"><span class="icon">🎟️</span> Manage Reservations</h2>
+                <div class="card card-no-hover">
+                    <div class="table-wrapper">
+                        <table id="libReservationsTable" style="display:none;">
+                            <thead>
+                                <tr>
+                                    <th>Student Name</th>
+                                    <th>Reg No</th>
+                                    <th>Dept</th>
+                                    <th>Book Title</th>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="libReservationsBody"></tbody>
+                        </table>
+                        <div id="libReservationsEmpty" class="empty-state">
+                            <span class="empty-icon">🎟️</span>
+                            <p>No reservations at the moment.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ Students Section ═══ -->
+            <div id="studentsSection" class="lib-section">
+                <h2 class="section-title"><span class="icon">👥</span> Registered Students</h2>
+                <div class="card card-no-hover">
+                    <div class="table-wrapper">
+                        <table id="studentsTable" style="display:none;">
+                            <thead>
+                                <tr>
+                                    <th>Student Name</th>
+                                    <th>Register Number</th>
+                                    <th>Department</th>
+                                    <th>Books Reserved</th>
+                                    <th>Books Borrowed</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentsBody"></tbody>
+                        </table>
+                        <div id="studentsEmpty" class="empty-state">
+                            <span class="empty-icon">👥</span>
+                            <p>No students registered yet.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ Reports Section ═══ -->
+            <div id="reportsSection" class="lib-section">
+                <h2 class="section-title"><span class="icon">📋</span> Monthly Reports</h2>
+
+                <!-- Report Generator -->
+                <div class="card card-no-hover" style="margin-bottom:28px;">
+                    <h3>📅 Generate Monthly Book Report</h3>
+                    <div class="form-grid" style="margin-top:16px;">
+                        <div class="form-group">
+                            <label for="reportMonth">Month</label>
+                            <select id="reportMonth">
+                                <option value="1">January</option>
+                                <option value="2">February</option>
+                                <option value="3">March</option>
+                                <option value="4">April</option>
+                                <option value="5">May</option>
+                                <option value="6">June</option>
+                                <option value="7">July</option>
+                                <option value="8">August</option>
+                                <option value="9">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="reportYear">Year</label>
+                            <input type="number" id="reportYear" value="2026" min="2020" max="2099">
+                        </div>
+                    </div>
+                    <div class="form-actions" style="margin-top:16px;">
+                        <button class="btn btn-primary btn-no-print" style="width:auto;"
+                            onclick="generateMonthlyReport()">📊 Generate Monthly Report</button>
+                        <button class="btn btn-outline btn-no-print" style="width:auto;" onclick="downloadReport()">⬇️
+                            Download PDF Report</button>
+                    </div>
+                    <div id="reportAlert" class="alert" style="margin-top:12px;"></div>
+                </div>
+
+                <!-- Report Output -->
+                <div id="reportOutput" style="display:none;">
+                    <!-- Overall Summary -->
+                    <div class="card card-no-hover" style="margin-bottom:24px;">
+                        <h3 class="section-title"><span class="icon">📈</span> Overall Summary — <span
+                                id="reportTitle"></span></h3>
+                        <div class="stats-row" style="margin-top:16px;">
+                            <div class="card stat-card orange">
+                                <span class="stat-icon">📤</span>
+                                <span class="stat-number" id="rTotalIssued">0</span>
+                                <span class="stat-label">Total Books Issued</span>
+                            </div>
+                            <div class="card stat-card green">
+                                <span class="stat-icon">📥</span>
+                                <span class="stat-number" id="rTotalReturned">0</span>
+                                <span class="stat-label">Total Books Returned</span>
+                            </div>
+                            <div class="card stat-card red">
+                                <span class="stat-icon">💰</span>
+                                <span class="stat-number" id="rTotalFine">₹0</span>
+                                <span class="stat-label">Total Fine Collected</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Department-wise Summary -->
+                    <div class="card card-no-hover" style="margin-bottom:24px;">
+                        <h3 class="section-title"><span class="icon">🏫</span> Department-wise Summary</h3>
+                        <div class="table-wrapper" style="margin-top:16px;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Department</th>
+                                        <th>Books Issued</th>
+                                        <th>Books Returned</th>
+                                        <th>Total Fine (₹)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reportDeptBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Student-wise Details -->
+                    <div class="card card-no-hover">
+                        <h3 class="section-title"><span class="icon">👤</span> Student-wise Details</h3>
+                        <div class="table-wrapper" style="margin-top:16px;">
+                            <table id="reportStudentTable" style="display:none;">
+                                <thead>
+                                    <tr>
+                                        <th>Student Name</th>
+                                        <th>Register No</th>
+                                        <th>Department</th>
+                                        <th>Books Borrowed</th>
+                                        <th>Books Returned</th>
+                                        <th>Fine Paid (₹)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reportStudentBody"></tbody>
+                            </table>
+                            <div id="reportStudentEmpty" class="empty-state" style="display:none;">
+                                <p>No student activity recorded for this month.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Edit Book Modal -->
+    <div id="editModal" class="modal-overlay">
+        <div class="modal">
+            <button class="modal-close" onclick="closeEditModal()">&times;</button>
+            <h3>✏️ Edit Book</h3>
+            <form id="editBookForm" onsubmit="handleEditBook(event)">
+                <input type="hidden" id="editBookId">
+                <div class="form-group">
+                    <label for="editTitle">Title</label>
+                    <input type="text" id="editTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="editAuthor">Author</label>
+                    <input type="text" id="editAuthor" required>
+                </div>
+                <div class="form-group">
+                    <label for="editIsbn">ISBN</label>
+                    <input type="text" id="editIsbn" required>
+                </div>
+                <div class="form-group">
+                    <label for="editDepartment">Department</label>
+                    <select id="editDepartment">
+                        <option value="CSE">CSE</option>
+                        <option value="ECE">ECE</option>
+                        <option value="EEE">EEE</option>
+                        <option value="Mechanical">Mechanical</option>
+                        <option value="Civil">Civil</option>
+                        <option value="Other" selected>Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editQty">Quantity</label>
+                    <input type="number" id="editQty" min="1" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" style="width:auto;">Save Changes</button>
+                    <button type="button" class="btn btn-outline" onclick="closeEditModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Student Books Details Modal -->
+    <div id="studentBooksModal" class="modal-overlay">
+        <div class="modal modal-lg">
+            <button class="modal-close" onclick="closeStudentBooksModal()">&times;</button>
+            <h3 id="studentBooksTitle">💬 Student Book Details</h3>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr id="studentBooksHeader">
+                            <!-- Headers will be dynamic -->
+                        </tr>
+                    </thead>
+                    <tbody id="studentBooksBody">
+                        <!-- Content will be dynamic -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="form-actions" style="margin-top: 20px;">
+                <button type="button" class="btn btn-outline" onclick="closeStudentBooksModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // ── Page Guard ──────────────────────────────────────────
+        (function () {
+            const user = JSON.parse(localStorage.getItem('bookbank_user') || 'null');
+            if (!user || user.role !== 'librarian') {
+                window.location.href = 'index.html';
+                return;
+            }
+            initLibrarianDashboard();
+        })();
+    </script>
+</body>
+
+</html>

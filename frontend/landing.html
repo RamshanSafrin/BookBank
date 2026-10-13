@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Academic Book Bank System - Welcome">
+    <title>Book Bank — Welcome</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Minimal specific additions for landing page to avoid breaking style.css */
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            /* Prevent scroll on landing page due to animations */
+            font-family: 'Inter', sans-serif;
+        }
+
+        .landing-hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            /* Modern Gradient Hero Background */
+            background: linear-gradient(-45deg, #1f140e, #3d2e1c, #6b4a2b, #2b1f13);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        .landing-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.6) 100%);
+            z-index: 1;
+        }
+
+        /* Animated particles/shapes */
+        .shape {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 50%;
+            z-index: 0;
+            animation: float 10s infinite ease-in-out;
+        }
+
+        .shape-1 {
+            width: 300px;
+            height: 300px;
+            top: 10%;
+            left: 15%;
+            animation-delay: 0s;
+        }
+
+        .shape-2 {
+            width: 500px;
+            height: 500px;
+            bottom: -10%;
+            right: 10%;
+            animation-delay: -3s;
+        }
+
+        .shape-3 {
+            width: 150px;
+            height: 150px;
+            top: 40%;
+            left: 70%;
+            animation-delay: -5s;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) scale(1.0);
+            }
+
+            50% {
+                transform: translateY(-30px) scale(1.05);
+            }
+
+            100% {
+                transform: translateY(0) scale(1.0);
+            }
+        }
+
+        @keyframes gradientBG {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .landing-content {
+            position: relative;
+            z-index: 2;
+            color: #faf4e8;
+            max-width: 800px;
+            padding: 0 20px;
+        }
+
+        .landing-content h1 {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 12px rgba(0, 0, 0, 0.6);
+            letter-spacing: -1px;
+        }
+
+        .landing-content p {
+            font-size: 1.35rem;
+            margin-bottom: 40px;
+            color: rgba(250, 244, 232, 0.95);
+            text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.5);
+            line-height: 1.6;
+        }
+
+        .landing-btn {
+            font-size: 1.2rem;
+            padding: 16px 42px;
+            border-radius: 40px;
+            background: #d4a373;
+            /* A warm matching tone */
+            color: #fff;
+            border: 2px solid #d4a373;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: bold;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            display: inline-block;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(212, 163, 115, 0.4);
+        }
+
+        .landing-btn:hover {
+            background: #e6b78a;
+            border-color: #e6b78a;
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(212, 163, 115, 0.6);
+            color: #1a1a1a;
+        }
+
+        .landing-fade-in {
+            animation: landingFadeInUp 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        .delay-1 {
+            animation-delay: 0.3s;
+        }
+
+        .delay-2 {
+            animation-delay: 0.6s;
+        }
+
+        .delay-3 {
+            animation-delay: 0.9s;
+        }
+
+        @keyframes landingFadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .landing-content h1 {
+                font-size: 2.8rem;
+            }
+
+            .landing-content p {
+                font-size: 1.15rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="landing-hero">
+        <div class="landing-overlay"></div>
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="landing-content">
+            <div class="logo-icon landing-fade-in"
+                style="font-size: 4.5rem; margin-bottom: 20px; display: inline-block;">📚</div>
+            <h1 class="landing-fade-in delay-1">Academic Book Bank System</h1>
+            <p class="landing-fade-in delay-2">Smart library management for students and librarians.<br>Empowering your
+                academic journey with seamless resource access.</p>
+            <a href="/login" class="landing-btn landing-fade-in delay-3" id="getStartedBtn">Get Started</a>
+            <script>
+                // Fallback: if page opened via file://, href /login won't work. Use index.html instead.
+                (function () {
+                    const btn = document.getElementById('getStartedBtn');
+                    if (window.location.protocol === 'file:') {
+                        btn.href = 'index.html';
+                    }
+                })();
+            </script>
+        </div>
+    </div>
+
+</body>
+
+</html>

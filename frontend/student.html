@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Student Dashboard — View your borrowed books, search the library catalog, and track due dates.">
+    <title>Book Bank — Student Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .notification-bell {
+            position: relative;
+            cursor: pointer;
+            font-size: 1.4rem;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .notification-bell .bell-badge {
+            position: absolute;
+            top: -5px;
+            right: -8px;
+            background: var(--red);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 50%;
+            font-weight: bold;
+        }
+
+        .notification-dropdown {
+            position: absolute;
+            top: 45px;
+            right: -10px;
+            width: 320px;
+            background: var(--card-bg-glass);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-lg);
+            border-radius: var(--radius-md);
+            padding: 15px;
+            z-index: 1000;
+        }
+
+        .notification-dropdown h4 {
+            margin-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+            font-size: 1rem;
+            color: var(--dark-brown);
+        }
+
+        .notification-dropdown ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .notification-dropdown li {
+            font-size: 0.85rem;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(139, 107, 62, 0.1);
+            color: var(--text-dark);
+        }
+
+        .notification-dropdown li:last-child {
+            border-bottom: none;
+        }
+
+        .notification-dropdown li.unread {
+            font-weight: bold;
+            background: rgba(139, 107, 62, 0.05);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="dashboard-header">
+        <div class="logo-area">
+            <span class="logo-icon">📚</span>
+            <h2>Book Bank</h2>
+        </div>
+        <div class="header-actions">
+            <div class="notification-bell" onclick="toggleNotifications()">
+                🔔 <span class="bell-badge" id="bellBadge" style="display:none;">0</span>
+                <div class="notification-dropdown" id="notificationDropdown" style="display:none;">
+                    <h4>Notifications & Due Dates</h4>
+                    <ul id="notificationList">
+                        <li>No notifications</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="user-info">
+                <div class="avatar" id="userAvatar">S</div>
+                <span id="userName">Student</span>
+            </div>
+            <button class="btn-logout" onclick="logout()">⏻ Logout</button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="dashboard-content">
+
+        <!-- Profile Card -->
+        <div class="card card-no-hover profile-card">
+            <div class="profile-info">
+                <h2 id="profileName">Loading...</h2>
+                <p>ID: <span id="profileId">—</span></p>
+                <p>Department: <span id="profileDept">—</span></p>
+            </div>
+            <div class="profile-stats">
+                <div class="stat-item" style="border-color: var(--red); background: var(--red-bg);">
+                    <span class="stat-number" id="fineBalance" style="color: var(--red);">₹0</span>
+                    <span class="stat-label" style="color: var(--red);">Fine</span>
+                    <button class="btn btn-sm btn-danger" id="payFineBtn"
+                        style="display:none; margin-top:8px; width:100%; padding:4px;" onclick="payFine()">Pay</button>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="availableBooksCount">0</span>
+                    <span class="stat-label">Total Available</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="borrowedCount">0</span>
+                    <span class="stat-label">Borrowed</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="reservedCount">0</span>
+                    <span class="stat-label">Reserved</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="dueSoonCount">0</span>
+                    <span class="stat-label">Due Soon</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="action-grid student-actions">
+            <div class="card action-card" onclick="scrollToSection('searchSection')">
+                <span class="action-icon">🔍</span>
+                <h4>Search Books</h4>
+                <p>Browse the library catalog</p>
+            </div>
+            <div class="card action-card" onclick="scrollToSection('myBooksSection')">
+                <span class="action-icon">📖</span>
+                <h4>My Books</h4>
+                <p>View your borrowed books</p>
+            </div>
+            <div class="card action-card" onclick="scrollToSection('myBooksSection')">
+                <span class="action-icon">📅</span>
+                <h4>Due Dates</h4>
+                <p>Check your return deadlines</p>
+            </div>
+        </div>
+
+        <!-- Search Section -->
+        <div id="searchSection" class="card card-no-hover search-section">
+            <h3 class="section-title"><span class="icon">🔍</span> Search Books</h3>
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Search by title, author, or ISBN..."
+                    onkeyup="handleSearchKeyup(event)">
+                <button class="btn btn-primary" style="width:auto;" onclick="searchBooks()">Search</button>
+            </div>
+            <div class="table-wrapper" style="margin-top:20px;">
+                <table id="searchResultsTable" style="display:none;">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>Department</th>
+                            <th>ISBN</th>
+                            <th>Available</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="searchResults"></tbody>
+                </table>
+                <div id="searchEmpty" class="empty-state" style="display:none;">
+                    <span class="empty-icon">📭</span>
+                    <p>No books found. Try a different search term.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- My Books Section (Active) -->
+        <div id="myBooksSection" class="card card-no-hover" style="animation: fadeInUp 0.6s ease-out 0.4s both;">
+            <h3 class="section-title"><span class="icon">📖</span> Active Borrowed Books</h3>
+            <div class="table-wrapper">
+                <table id="myBooksTable" style="display:none;">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>Issue Date</th>
+                            <th>Due Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myBooksBody"></tbody>
+                </table>
+                <div id="myBooksEmpty" class="empty-state">
+                    <p>You haven't borrowed any books currently.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Borrow History (Returned) -->
+        <div id="historySection" class="card card-no-hover"
+            style="margin-top: 28px; animation: fadeInUp 0.6s ease-out 0.5s both;">
+            <h3 class="section-title"><span class="icon">📘</span> Borrow History</h3>
+            <div class="table-wrapper">
+                <table id="historyTable" style="display:none;">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>Issue Date</th>
+                            <th>Returned Date</th>
+                            <th>Fine Paid</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyBody"></tbody>
+                </table>
+                <div id="historyEmpty" class="empty-state">
+                    <p>No borrow history found.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reservation History -->
+        <div id="reservationSection" class="card card-no-hover"
+            style="margin-top: 28px; animation: fadeInUp 0.6s ease-out 0.6s both;">
+            <h3 class="section-title"><span class="icon">🎟️</span> My Reservations</h3>
+            <div class="table-wrapper">
+                <table id="reservationTable" style="display:none;">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>Reservation Start</th>
+                            <th>Reservation End</th>
+                            <th>Status</th>
+                            <th>Issued Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reservationBody"></tbody>
+                </table>
+                <div id="reservationEmpty" class="empty-state">
+                    <p>No reservations found.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Reserve Book Modal -->
+    <div id="reserveModal" class="modal-overlay">
+        <div class="modal">
+            <button class="modal-close" onclick="closeReserveModal()">&times;</button>
+            <h3>🎟️ Reserve Book</h3>
+            <form id="reserveBookForm" onsubmit="handleReserveBook(event)">
+                <input type="hidden" id="reserveBookId">
+                <div class="form-group">
+                    <label for="reserveStartDate">Start Date</label>
+                    <input type="date" id="reserveStartDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="reserveEndDate">End Date</label>
+                    <input type="date" id="reserveEndDate" required>
+                    <small style="color:var(--text-muted);">Duration must be between 3 and 6 months.</small>
+                </div>
+                <div id="reserveAlert" class="alert"></div>
+                <div class="form-actions" style="margin-top: 20px;">
+                    <button type="submit" class="btn btn-primary" id="reserveBtn" style="width:auto;">Confirm
+                        Reservation</button>
+                    <button type="button" class="btn btn-outline" onclick="closeReserveModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // ── Page Guard ──────────────────────────────────────────
+        (function () {
+            const user = JSON.parse(localStorage.getItem('bookbank_user') || 'null');
+            if (!user || user.role !== 'student') {
+                window.location.href = 'index.html';
+                return;
+            }
+            initStudentDashboard();
+        })();
+    </script>
+</body>
+
+</html>

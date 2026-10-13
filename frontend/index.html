@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="Book Bank Management System — Login and Register to access your academic library dashboard.">
+  <title>Book Bank — Login</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div class="auth-wrapper">
+    <div class="auth-card">
+      <!-- Logo -->
+      <div class="logo">
+        <span class="logo-icon">📚</span>
+        <h1>Book Bank</h1>
+        <p>Academic Library Management</p>
+      </div>
+
+      <!-- Alert Area -->
+      <div id="authAlert" class="alert"></div>
+
+      <!-- Tab Toggle -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login" onclick="switchTab('login')">Login</button>
+        <button class="auth-tab" data-tab="register" onclick="switchTab('register')">Register</button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="loginForm" class="auth-form active" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label for="loginFullName">Full Name</label>
+          <input type="text" id="loginFullName" placeholder="Enter your full name" required>
+        </div>
+        <div class="form-group">
+          <label for="loginUserId">Register Number</label>
+          <input type="text" id="loginUserId" placeholder="Enter your Register Number" required>
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" placeholder="Enter your password" required>
+          <div style="text-align: right; margin-top: 5px;">
+            <a href="reset-password.html" class="forgot-password-link"
+              style="font-size: 0.85rem; color: var(--primary); text-decoration: none;">Forgot Password?</a>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary" id="loginBtn">
+          Sign In
+        </button>
+      </form>
+
+      <!-- Register Form -->
+      <form id="registerForm" class="auth-form" onsubmit="handleRegister(event)">
+        <div class="form-group">
+          <label for="regName">Full Name</label>
+          <input type="text" id="regName" placeholder="Enter your full name" required>
+        </div>
+        <div class="form-group">
+          <label for="regEmail">Email ID</label>
+          <input type="email" id="regEmail" placeholder="Enter your email address" required>
+        </div>
+        <div class="form-group">
+          <label for="regUserId">Register Number</label>
+          <input type="text" id="regUserId" placeholder="Enter your unique Register Number" required>
+        </div>
+        <div class="form-group">
+          <label for="regPassword">Password</label>
+          <input type="password" id="regPassword" placeholder="Min 6 characters" minlength="6" required>
+        </div>
+        <div class="form-group">
+          <label for="regDepartment">Department</label>
+          <select id="regDepartment" required>
+            <option value="">Select Department...</option>
+            <option value="CSE">CSE</option>
+            <option value="ECE">ECE</option>
+            <option value="EEE">EEE</option>
+            <option value="Mechanical">Mechanical</option>
+            <option value="Civil">Civil</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary" id="registerBtn">
+          Create Account
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
